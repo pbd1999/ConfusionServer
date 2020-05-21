@@ -1,64 +1,93 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const mongoose = require('mongoose');
+const Leaders = require('../models/leaders');
+
+
 const leadersRouter = express.Router();
 leadersRouter.use(bodyParser.json());
 
 leadersRouter.route('/')
-.all((req,res,next) =>
-{
-	res.statusCode = 200;
-	res.setHeader('Content-Type', 'text/plain');
-	next();
+.get( (req,res,next)=>{
 
+    Leaders.find({}).then((leaders) =>
+    {
+        res.statusCode =200;
+        res.setHeader('Content-Type','application/json');
+        res.json(leaders);
+    },(err)=> next(err))
+    .catch((err) => next(err));
+    
 })
 
-.get((req,res,next)=>{
-	res.end('This will retrive the leaders  from the database');
+.post( (req,res,next)=>{
+    
+    Leaders.create(req.body).then((leader) => 
+    {
+        res.statusCode =200;
+        res.setHeader('Content-Type','application/json');
+        res.json(leader);
+    },(err) => next(err))
+    .catch((err) => next(err));
 })
 
-.post((req,res,next) =>{
-	res.end('will add the leader :'+req.body.name +' with details: '+req.body.description);
+.put( (req,res,next)=>{
+    res.statusCode = 403;
+    res.end('PUT operation is not supported /promotions');
 })
 
-.put((req,res,next) =>{
-	res.statusCode = 403;
-	res.end('put operation is not supported!');
-})
+.delete( (req,res,next)=>{
+    
+    Leaders.remove({}).then((resp) =>
+    {
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        res.json(resp);
 
-.delete((req,res,next) =>{
-	res.end('leaders will be deleted!');;
+    },(err) => next(err))
+    .catch((err) => next(err));
 });
 
-leadersRouter.route('/:leadId')
-// .all((req,res,next) =>
-// {
-// 	res.statusCode = 200;
-// 	res.setHeader('Content-Type', 'text/plain');
-// 	next();
-
-// })
-
-.get((req,res,next)=>{
-	res.end('This will retrive the details of leader  from the database : '+ req.params.leadId);
+leadersRouter.route('/:leadersId')
+.get( (req,res,next)=>{
+    
+    Leaders.findById(req.params.leadersId).then((leader)=>
+    {
+        res.statusCode =200;
+        res.setHeader('Content-Type','application/json');
+        res.json(leader);
+    },(err) => next(err))
+    .catch((err) => next(err));
 })
 
-
-.put((req,res,next) =>{
-	res.write('Updating  the leader : '+req.params.leadId);
-	res.end('\nwill update the leader : '+req.body.name+' with details: '+req.body.description);
+.post((req,res,next)=>{
+    res.statusCode = 403;
+    res.end('POST operation is not supported on /promotions/ ' + req.params.leadersId);
 })
 
-.delete((req,res,next) =>{
-	res.end('will delete the leader:'+req.params.leadId);
-})
+.put((req,res,next)=>{
+         Leaders.findByIdAndUpdate(req.params.leadersId
+, {$set : req.body},{new :true}).then((leader) =>
+    {
+        res.statusCode =200;
+        res.setHeader('Content-Type','application/json');
+        res.json(leader);
+    },(err) => next(err))
+    .catch((err) => next(err));
+})    
 
-.post((req,res,next) =>
-{
-	//res.writeHead('403','not supported!');
-	res.statusCode = 403;
-	res.end('post operation is not supported !');
+
+.delete((req,res,next)=>{
+
+         Leaders.findByIdAndRemove(req.params.leadersId).then((resp) =>
+    {
+        res.statusCode = 200;
+        res.setHeader('Content-Type','application/json');
+        res.json(resp);
+
+    },(err) => next(err))
+    .catch((err) => next(err));
 });
-
 
 module.exports = leadersRouter;
