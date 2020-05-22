@@ -3,11 +3,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session = require('express-session');
+var fileStore = require('session-file-store')(session);
+
 
 const mongoose = require('mongoose');
 const Dishes = require('./models/dishes');
 const Promos = require('./models/promotions');
-const Leaders = require('./models/leaders')
+const Leaders = require('./models/leaders');
 
 const url = 'mongodb://localhost:27017/conFusion';
 const connect = mongoose.connect(url);
@@ -33,11 +36,21 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser('12345-0984-2314'));
+//app.use(cookieParser('12345-0984-2314'));
+app.use(session(
+	{
+		name: 'session-id',
+  		secret: '12345-67890-09876-54321',
+  		saveUninitialized: false,
+  		resave: false,
+  		store: new fileStore()
+	}));
 
 function auth(req,res,next)
 {
-	if(!req.signedCookies.user)
+	console.log(req.session);
+
+	if(!req.session.user)
 	{	
 		var authHeader= req.headers.authorization;
 
@@ -56,7 +69,8 @@ function auth(req,res,next)
 
 	 	if(user === 'admin' && pass === 'pass')
 	 	{
-	 		res.cookie('user','admin', {signed:true});
+	 		//res.cookie('user','admin', {signed:true});
+	 	 	req.session.user = "admin";
 	 	 	next();
 	 	}	
 
@@ -71,8 +85,11 @@ function auth(req,res,next)
 
 	else
 	{
-		if(req.signedCookies.user === 'admin')
+		if(req.session.user === 'admin')
+		{
+			console.log("req.session: ",req.session);
 			next();
+		}	
 
 		else
 		{
