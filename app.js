@@ -54,10 +54,10 @@ app.use(express.urlencoded({ extended: false }));
 	}));
 */
 app.use(passport.initialize());
-// app.use(passport.session());
+app.use(passport.session());
 
 
-/*function auth (req, res, next) {
+function auth (req, res, next) {
     console.log(req.user);
 
     if (!req.user) {
@@ -68,7 +68,7 @@ app.use(passport.initialize());
     else {
           next();
     }
-}*/
+}
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

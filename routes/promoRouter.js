@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-
+var authenticate = require('../authenticate');
 const mongoose = require ('mongoose');
 const Promos = require('../models/promotions');
 
@@ -37,7 +37,7 @@ promoRouter.route('/')
     res.end('PUT operation is not supported /promotions');
 })
 
-.delete( (req,res,next)=>{
+.delete((req,res,next)=>{
     
     Promos.remove({}).then((resp) =>
     {
